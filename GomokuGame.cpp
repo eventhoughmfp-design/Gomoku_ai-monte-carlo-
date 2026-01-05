@@ -41,10 +41,6 @@ void GomokuGame::StartGame(){
     init_ChessBoard_state(current_board);   //添加初始棋盘
 }
 
-Player GomokuGame::GetCurPlayer()const noexcept{
-    return current_player;
-}
-
 ChessBoard GomokuGame::GetCurBoard()const noexcept{
     return current_board;
 }

@@ -17,7 +17,6 @@ public:
     //公共游戏接口
     void StartGame();
     ChessBoard GetCurBoard() const noexcept;
-    Player GetCurPlayer() const noexcept;
     bool Make_Move(int row,int col,Player player);   //判断当前玩家的落子是否合法
     std::pair <int,int> GetAIMove();   //获取AI落子位置
     Player CheckWinner()noexcept;
