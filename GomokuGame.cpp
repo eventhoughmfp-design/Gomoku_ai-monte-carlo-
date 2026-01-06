@@ -221,7 +221,7 @@ std::pair<ChessBoard,Player> GomokuGame::treePolicy(ChessBoard board,Player play
         int room=(x2-x1+1)*(y2-y1+1);      //计算总共的搜索空间
         if(count_piece(board,x1,x2,y1,y2)+statemap[board].children.size()<room){
             Player p=(player==Player::Black)? Player::White:Player::Black;
-            return std::make_pair(expand(board,player,center),p);     //如果当前搜索区域落子数和棋盘的子节点之和小于搜索空间，说明未扩展完
+            return std::make_pair(expand(board,player,x1,x2,y1,y2),p);     //如果当前搜索区域落子数和棋盘的子节点之和小于搜索空间，说明未扩展完
         }
         else{
             if(statemap[board].children.empty()){
@@ -245,12 +245,8 @@ std::pair<ChessBoard,Player> GomokuGame::treePolicy(ChessBoard board,Player play
     return std::make_pair(board,p);
 }
 
-ChessBoard GomokuGame::expand(ChessBoard board,Player player,std::pair<int,int> center){
+ChessBoard GomokuGame::expand(ChessBoard board,Player player,int x1,int x2,int y1,int y2){
     ChessBoard temp=board;                                       //用一个中间量方便后续操作
-    int x1=std::max(0,center.first-select_range);
-    int x2=std::min(BOARD_ROWS-1,center.first+select_range);
-    int y1=std::max(0,center.second-select_range);
-    int y2=std::min(BOARD_COLS-1,center.second+select_range);
     for(int i=x1;i<=x2;i++){
         for(int j=y1;j<=y2;j++){
             if(temp.grid[i][j]==Player::None){
