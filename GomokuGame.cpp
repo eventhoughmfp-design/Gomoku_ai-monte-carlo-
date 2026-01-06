@@ -192,9 +192,9 @@ ChessBoard GomokuGame::uctSearch(const ChessBoard& board,Player player,std::pair
     int cnt=SELECT_NUM;
     //开始进行多次选择模拟
     while(cnt--){
-        std::pair<ChessBoard,Player> select_node=treePolicy(board,player,center);    //每次选择都选目前看起来最好的或最需要模拟的节点
+        std::pair<ChessBoard,Player> select_node=Select(board,player,center);    //每次选择都选目前看起来最好的或最需要模拟的节点
         for(int i=0;i<SIMULATION_NUM;i++){
-            double value=default_policy(select_node.first,select_node.second);
+            double value=simulation_method(select_node.first,select_node.second);
             back_up(select_node.first,board,value);           //反向传播
         }
     }
@@ -211,7 +211,7 @@ ChessBoard GomokuGame::uctSearch(const ChessBoard& board,Player player,std::pair
     return bestmove;
 }
 
-std::pair<ChessBoard,Player> GomokuGame::treePolicy(ChessBoard board,Player player,std::pair<int,int> center){
+std::pair<ChessBoard,Player> GomokuGame::Select(ChessBoard board,Player player,std::pair<int,int> center){
     while(check_winner(board)==Player::None&&!is_terminal(board)){
         //计算搜索范围的四角坐标
         int x1=std::max(0,center.first-select_range);
@@ -277,7 +277,7 @@ double GomokuGame::UCB(const ChessBoard& board,Player player) noexcept{
     return (player==Player::Black)? win_rate+search_weight:-win_rate+search_weight;  //取负转换视角
 }
 
-double GomokuGame::default_policy(ChessBoard board,Player player){
+double GomokuGame::simulation_method(ChessBoard board,Player player){
     int range=2;
     int pieces=count_piece(board,0,BOARD_ROWS-1,0,BOARD_COLS-1);
     if(pieces>20) range+=2;             //根据传入的节点动态改变搜索范围

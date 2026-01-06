@@ -25,11 +25,11 @@ public:
 private:
     ChessBoard uctSearch(const ChessBoard& board,Player player,std::pair<int,int> center);                     //利用uct算法找到AI当前棋局下最优的下一步棋盘
 
-    std::pair<ChessBoard,Player> treePolicy(ChessBoard board,Player player,std::pair<int,int> center);  //利用MCT树的逻辑，从当前盘面向下扩展，并通过比较UCB值选择一个最佳的子节点返回
+    std::pair<ChessBoard,Player> Select(ChessBoard board,Player player,std::pair<int,int> center);  //利用MCT树的逻辑，从当前盘面向下扩展，并通过比较UCB值选择一个最佳的子节点返回
 
     ChessBoard expand(ChessBoard board,Player player,int x1,int x2,int y1,int y2);                        //从当前棋盘向下扩展
 
-    double default_policy(ChessBoard board,Player player);                    //对当前棋局进行推演，返回胜（1.0）负（-1.0）平（0.0）用于累加胜利次数
+    double simulation_method(ChessBoard board,Player player);                    //对当前棋局进行推演，返回胜（1.0）负（-1.0）平（0.0）用于累加胜利次数
 
     double UCB(const ChessBoard& board,Player player) noexcept;                   //利用statemap找到该棋盘对应的性质并计算ucb值
 
