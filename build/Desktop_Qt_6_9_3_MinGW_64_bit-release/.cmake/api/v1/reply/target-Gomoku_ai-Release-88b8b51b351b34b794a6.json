@@ -385,7 +385,7 @@
 				2,
 				6,
 				8,
-				11
+				10
 			]
 		}
 	],
@@ -511,7 +511,7 @@
 				2,
 				6,
 				8,
-				11
+				10
 			]
 		},
 		{
@@ -522,8 +522,7 @@
 				5,
 				7,
 				9,
-				10,
-				12
+				11
 			]
 		},
 		{
@@ -537,14 +536,14 @@
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				13
+				12
 			]
 		},
 		{
 			"name" : "CMake Rules",
 			"sourceIndexes" : 
 			[
-				14
+				13
 			]
 		}
 	],
@@ -604,11 +603,6 @@
 		{
 			"backtrace" : 4,
 			"path" : "bitBoard.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 4,
-			"path" : "config.h",
 			"sourceGroupIndex" : 1
 		},
 		{
