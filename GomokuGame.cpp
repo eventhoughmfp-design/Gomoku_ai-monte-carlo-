@@ -139,33 +139,45 @@ ChessBoard GomokuGame::uctSearch(const ChessBoard& board,Player player,std::pair
     //启发式落子
     ChessBoard bestmove=board;
 
+    Player opponent=(player==Player::Black)? Player::White:Player::Black;
+    std::pair<int,int> coord={-1,-1};
     if(round>=8){
         std::pair<bool,std::pair<int,int>> temp1=check_four(board,player);
         if(temp1.first){
-            std::pair<int,int> coord=temp1.second;
-            bestmove.grid[coord.first][coord.second]=player;
-            return bestmove;
+            coord=temp1.second;
         }
-        Player opponent=(player==Player::Black)? Player::White:Player::Black;
-        std::pair<bool,std::pair<int,int>> temp2=check_four(board,opponent);
-        if(temp2.first){
-            std::pair<int,int> coord=temp2.second;
+        else{
+            std::pair<bool,std::pair<int,int>> temp2=check_four(board,opponent);
+            if(temp2.first){
+                coord=temp2.second;
+            }
+        }
+        if(coord.first!=-1){
             bestmove.grid[coord.first][coord.second]=player;
             return bestmove;
         }
     }
 
     if(round>=6){
-        std::pair<bool,std::pair<int,int>> temp=check_three(board,player);
-        if(temp.first){
-            std::pair<int,int> coord=temp.second;
+        std::pair<bool,std::pair<int,int>> temp1=check_three(board,player);
+        if(temp1.first){
+            coord=temp1.second;
+        }
+        else{
+            std::pair<bool,std::pair<int,int>> temp2=check_three(board,opponent);
+            if(temp2.first){
+                coord=temp2.second;
+            }
+        }
+
+        if(coord.first!=-1){
             bestmove.grid[coord.first][coord.second]=player;
             return bestmove;
         }
     }
 
     if(round>=8){
-        std::pair<int,int> coord=check_double_thread(board);
+        coord=check_double_thread(board);
         if(coord.first!=-1){
             bestmove.grid[coord.first][coord.second]=player;
             return bestmove;
@@ -450,29 +462,14 @@ std::pair<bool,std::pair<int,int>> GomokuGame::check_three(ChessBoard board,Play
             board.grid[i][j]=Player::None;
         }
     }
-    for(int i=0;i<BOARD_ROWS;i++){
-        for(int j=0;j<BOARD_COLS;j++){
-            if(board.grid[i][j]!=Player::None) continue;
-            board.grid[i][j]=opponent;
-            bool flag=true;
-            for(int k1=std::max(0,i-4);k1<=std::min(BOARD_ROWS-1,i+4);k1++){
-                for(int k2=std::max(0,j-4);k2<=std::min(BOARD_COLS-1,j+4);k2++){
-                    if(board.grid[k1][k2]!=Player::None) continue;
-                    board.grid[k1][k2]=player;
-                    if(check_four(board,opponent).first==false) flag=false;
-                    board.grid[k1][k2]=Player::None;
-                }
-            }
-            if(flag==true){
-                return {true,{i,j}};
-            }
-            board.grid[i][j]=Player::None;
-        }
-    }
     return {false,{0,0}};     //未找到
 }
 
-void threads(Player& p1,Player& p2,Player& p3,Player& p4,double& b_threads,double& w_threads){
+void threads(const ChessBoard& board,int i,int j,std::pair<int,int> dr_dc,double& b_threads,double& w_threads){
+    int dr=dr_dc.first,dc=dr_dc.second;
+    Player p1=board.grid[i+dr][j+dc],p2=board.grid[i+dr*2][j+dc*2],
+        p3=board.grid[i+dr*3][j+dc*3],p4=board.grid[i-dr][j-dc];
+
     if((p1==p2)&&(p3==p4)&&(p3==Player::None)){
         if(p1==Player::Black) b_threads++;
         else if(p1==Player::White) w_threads++;
@@ -507,41 +504,38 @@ std::pair<int,int> GomokuGame::check_double_thread(const ChessBoard& board){
     for(int i=0;i<BOARD_ROWS;i++){
         for(int j=0;j<BOARD_COLS;j++){
             if(board.grid[i][j]!=Player::None) continue;
+
             if(j-3>=0&&j+2<BOARD_COLS){
-                Player p1=board.grid[i][j-1],p2=board.grid[i][j-2],p3=board.grid[i][j-3],p4=board.grid[i][j+1];  //向左延伸
-                threads(p1,p2,p3,p4,b_threads,w_threads);
+                threads(board,i,j,{0,-1},b_threads,w_threads);        //向左延伸
                 if(i-3>=0&&i+2<BOARD_ROWS){
-                    p1=board.grid[i-1][j-1],p2=board.grid[i-2][j-2],p3=board.grid[i-3][j-3],p4=board.grid[i+1][j+1];  //主对角延伸
-                    threads(p1,p2,p3,p4,b_threads,w_threads);
+                    threads(board,i,j,{-1,-1},b_threads,w_threads);   //主对角延伸
                 }
                 if(i+3<BOARD_ROWS&&i-2>=0){
-                    p1=board.grid[i+1][j-1],p2=board.grid[i+2][j-2],p3=board.grid[i+3][j-3],p4=board.grid[i-1][j+1];  //副对角延伸
-                    threads(p1,p2,p3,p4,b_threads,w_threads);
+                    threads(board,i,j,{1,-1},b_threads,w_threads);    //副对角延伸
                 }
             }
+
             if(j+3<BOARD_COLS&&j-2>=0){
-                Player p1=board.grid[i][j+1],p2=board.grid[i][j+2],p3=board.grid[i][j+3],p4=board.grid[i][j-1];  //向右延伸
-                threads(p1,p2,p3,p4,b_threads,w_threads);
+                threads(board,i,j,{0,1},b_threads,w_threads);         //向右延伸
                 if(i-3>=0&&i+2<BOARD_ROWS){
-                    p1=board.grid[i-1][j+1],p2=board.grid[i-2][j+2],p3=board.grid[i-3][j+3],p4=board.grid[i+1][j-1];  //副对角延伸
-                    threads(p1,p2,p3,p4,b_threads,w_threads);
+                    threads(board,i,j,{-1,1},b_threads,w_threads);    //副对角延伸
                 }
                 if(i+3<BOARD_ROWS&&i-2>=0){
-                    p1=board.grid[i+1][j+1],p2=board.grid[i+2][j+2],p3=board.grid[i+3][j+3],p4=board.grid[i-1][j-1];  //主对角延伸
-                    threads(p1,p2,p3,p4,b_threads,w_threads);
+                    threads(board,i,j,{1,1},b_threads,w_threads);     //主对角延伸
                 }
             }
+
             if(i-3>=0&&i+2<BOARD_ROWS){
-                Player p1=board.grid[i-1][j],p2=board.grid[i-2][j],p3=board.grid[i-3][j],p4=board.grid[i+1][j];   //向上延伸
-                threads(p1,p2,p3,p4,b_threads,w_threads);
+                threads(board,i,j,{-1,0},b_threads,w_threads);        //向上延伸
             }
             if(i+3<BOARD_ROWS&&i-2>=0){
-                Player p1=board.grid[i+1][j],p2=board.grid[i+2][j],p3=board.grid[i+3][j],p4=board.grid[i-1][j];   //向下延伸
-                threads(p1,p2,p3,p4,b_threads,w_threads);
+                threads(board,i,j,{1,0},b_threads,w_threads);         //向下延伸
             }
+
             if(std::round(b_threads)>=2||std::round(w_threads)>=2) return {i,j};
             b_threads=0,w_threads=0;
         }
     }
     return {-1,-1};
 }
+
